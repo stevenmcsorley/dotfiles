@@ -1,10 +1,34 @@
 #!/usr/bin/env bash
+
+# Select a directory using fzf
 session=$(find ~/work ~/personal -mindepth 1 -maxdepth 1 -type d | fzf)
 
-session_name=$(basename "$session" | tr . _)
-
-if ! tmux has-session -t "$session_name" 2> /dev/null; then
-    tmux new-session -s "$session_name" -c "$session" -d
+# If no directory is selected, exit
+if [ -z "$session" ]; then
+    exit 0
 fi
 
-tmux switch-client -t "$session_name"
+# Get the session name
+session_name=$(basename "$session" | tr . _)
+
+# Check if tmux is running
+if pgrep tmux > /dev/null; then
+    # If tmux is running, check if the session exists
+    if ! tmux has-session -t "$session_name" 2> /dev/null; then
+        # If the session does not exist, create a new session
+        tmux new-session -s "$session_name" -c "$session" -d
+    fi
+
+    # Check if there's an active tmux client
+    if tmux list-clients | grep -q "^"; then
+        # Switch to the tmux session if there's an active client
+        tmux switch-client -t "$session_name"
+    else
+        # Attach to the tmux session if there's no active client
+        tmux attach-session -t "$session_name"
+    fi
+else
+    # If tmux is not running, open the directory in Vim
+    cd "$session" && exec nvim .
+fi
+
