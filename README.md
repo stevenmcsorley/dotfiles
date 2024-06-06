@@ -22,6 +22,10 @@ This repository contains my personal configuration files (dotfiles) for various 
     ```sh
     sudo apt-get install stow
     ```
+Or use this Ansible script to install the version with the directory bug fix here:
+    ```sh
+    git clone https://github.com/stevenmcsorley/ansiblesetups ~/ansible_setups
+    ```
 
 ## Usage
 
